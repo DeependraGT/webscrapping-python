@@ -2,6 +2,24 @@ import scrapy
 from selenium import webdriver
 import time
 import requests
+import logging
+import logging.handlers
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+
+LOG_FILENAME = 'iimjobs-selenium.log'
+logging.basicConfig(filename=LOG_FILENAME,level=logging.DEBUG)
+
+# Set up a specific logger with our desired output level
+my_logger = logging.getLogger('MyLogger')
+my_logger.setLevel(logging.DEBUG)
+
+# Add the log message handler to the logger
+handler = logging.handlers.RotatingFileHandler(
+              LOG_FILENAME)
+
+my_logger.addHandler(handler)
 
 class ProductSpider(scrapy.Spider):
     name = "product_spider"
@@ -12,7 +30,8 @@ class ProductSpider(scrapy.Spider):
     filePath = 'E:/DataScrapping/Resumes/'
 
     def __init__(self):
-        self.driver = webdriver.Chrome()
+        my_logger.debug("Initializing the spider")
+        self.driver = webdriver.PhantomJS()
 
     def parse(self, response):
         self.driver.get(response.url)
@@ -33,6 +52,9 @@ class ProductSpider(scrapy.Spider):
                 # Clicking on the submit button after filling email/ password
                 login.click()
                 time.sleep(15)
+
+                #wait = WebDriverWait(self.driver, 10)
+                #element = wait.until(EC.element_to_be_clickable((By.ID, 'chat-div')))
 
                 # Checking Login request success or not
                 """self.driver.get("https://recruit.iimjobs.com/")
@@ -58,6 +80,8 @@ class ProductSpider(scrapy.Spider):
         urlSplits = resumeurl.split('/')
         arrayLength = len(urlSplits)
         generatedFileName = self.filePath + urlSplits[arrayLength - 2] + '_' + urlSplits[arrayLength-1]
+        self.log("Generated File Name : %s" % generatedFileName)
+        my_logger.debug("Generated File Name : %s" % generatedFileName)
 
         # Get the file from url and saved the file as generated name
         myfile = requests.get(resumeurl, allow_redirects=True)
