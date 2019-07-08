@@ -31,7 +31,7 @@ class ProductSpider(scrapy.Spider):
 
     def __init__(self):
         my_logger.debug("Initializing the spider")
-        self.driver = webdriver.PhantomJS()
+        self.driver = webdriver.Chrome()
 
     def parse(self, response):
         self.driver.get(response.url)
@@ -61,19 +61,62 @@ class ProductSpider(scrapy.Spider):
                 loggedinName = self.driver.find_element_by_class_name('heading')"""
                
 
-                # Loading the new application resumes
-                self.driver.get('https://recruit.iimjobs.com/job/715710/applications')
+                self.driver.get('https://recruit.iimjobs.com/jobs')
                 time.sleep(15)
-                resumes = self.driver.find_elements_by_class_name('candidateDownloadResume')
+                jobs = self.driver.find_elements_by_css_selector('.jobEngagement a.jobApplicationsLink')
 
-                # Download and saving resumes
-                for ele in resumes:
-                    resumehref = ele.get_attribute('data-href')
-                    self.downloadResumes(resumehref)
+                if jobs is None:
+                    break
+
+                for job in jobs:
+                    applicationUrl = job.get_attribute('href')
+                    my_logger.debug("Job Urls : " + applicationUrl)
+
+                    if applicationUrl is None:
+                        break
+
+                    self.driver.get(applicationUrl)
+                    time.sleep(15)
+                    profiles = self.driver.find_elements_by_css_selector('.candidateRow a.openCandidateLink')
+
+                    if profiles is None:
+                        break
+
+                    maxprofileCounter = 10
+                    for profile in profiles:
+                        if maxprofileCounter == 0:
+                            break
+
+                        profileUrl = profile.get_attribute('href')
+                        maxprofileCounter -= 1
+                        my_logger.debug("Profile Url {}: {}".format(maxprofileCounter,profileUrl))
+
+                        self.driver.get(profileUrl)
+                        time.sleep(15)
+                        element =  self.driver.find_element_by_css_selector('div.email-address')
+                        my_logger.debug(element)
+                        my_logger.debug(element.text)   
+
+
+
+                # Loading the new application resumes
+                  """  self.driver.get(applicationUrl)
+                    time.sleep(15)
+                    resumes = self.driver.find_elements_by_class_name('candidateDownloadResume')"""
+
+                    # Download and saving resumes
+                   """ for ele in resumes:
+                        resumehref = ele.get_attribute('data-href')
+                        self.downloadResumes(resumehref)"""
+
+
             except:
                 break
         
         self.driver.close()
+
+
+
 
     # Download and save resumes on specific folder
     def downloadResumes(self,resumeurl):
