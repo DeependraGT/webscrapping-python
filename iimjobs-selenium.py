@@ -82,33 +82,25 @@ class ProductSpider(scrapy.Spider):
                     if profiles is None:
                         break
 
+                    profileArray = []
                     maxprofileCounter = 10
                     for profile in profiles:
                         if maxprofileCounter == 0:
                             break
 
                         profileUrl = profile.get_attribute('href')
+                        profileArray.append(profileUrl)
                         maxprofileCounter -= 1
                         my_logger.debug("Profile Url {}: {}".format(maxprofileCounter,profileUrl))
 
-                        self.driver.get(profileUrl)
+                    for url in profileArray:
+                        self.driver.get(url)
                         time.sleep(15)
                         element =  self.driver.find_element_by_css_selector('div.email-address')
                         my_logger.debug(element)
-                        my_logger.debug(element.text)   
+                        my_logger.debug(element.text)
 
-
-
-                # Loading the new application resumes
-                  """  self.driver.get(applicationUrl)
-                    time.sleep(15)
-                    resumes = self.driver.find_elements_by_class_name('candidateDownloadResume')"""
-
-                    # Download and saving resumes
-                   """ for ele in resumes:
-                        resumehref = ele.get_attribute('data-href')
-                        self.downloadResumes(resumehref)"""
-
+                    self.driver.close()
 
             except:
                 break

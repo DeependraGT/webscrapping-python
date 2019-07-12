@@ -152,22 +152,26 @@ def naukriLogin():
             driver.implicitly_wait(3)
             driver.get(NaukriURL)
             tabElement = driver.find_element_by_xpath('//*[@id="toggleForm"]/li[2]')
-
             tabElement.click()
             time.sleep(10)
             
-            email = driver.find_element_by_id('loginEmail')
-            email.clear()
-            email.send_keys(username)
-            time.sleep(20)
-            password = driver.find_element_by_xpath('//*[@id="password"]')
-            password.clear()
-            password.send_keys(password)
-
+            script = "$('#loginEmail').val('deependra.singh@greatdevelopers.com');$('#password').val('Ds@12345');"
+            print script
+            driver.execute_script(script)
+            time.sleep(15)
             login = driver.find_element_by_xpath('//*[@id="loginBtn"]')
             login.click()
-            time.sleep(30)
+            time.sleep(15)
             
+            otp = raw_input("Enter naukri otp : ")
+            otpEle = driver.find_element_by_id('otpCode')
+            otpEle.clear()
+            otpEle.send_keys(otp)
+
+            verifyEle = driver.find_element_by_id('verifyOtpBtn')
+            verifyEle.click()
+            time.sleep(15)
+
             if 'Naukri.com' in driver.title:
                 print("Website Loaded Successfully.")
                 logging.info("Website Loaded Successfully.")
